@@ -165,23 +165,23 @@ void GameLogic::NewRound()
 
 	m_WordsToGuess.clear();
 
-	auto iWordsToGuess = 2;
+	int iWordsToGuess;
 	m_RoundNum++;
 
-
-	if( m_RoundNum % 3 == 0 )
+	if( m_RoundNum % 3 == 0 ) // Challenge Round every 3rd round
 	{
-		iWordsToGuess = 1; // Challenge Round!
+		iWordsToGuess = 1; // One word to guess in challenge round
 		m_bChallengeRound = true;
 	}
 	else
 	{
+		iWordsToGuess = 2;
 		m_bChallengeRound = false;
 	}
 
 	if( !Network::GetWordsToGuess(iWordsToGuess, m_WordsToGuess) )  // ask server for words
 	{
-		// network request for words failed, just use local dictionary words as a fall back option
+		// network request for words failed, just use local dictionary words as a fallback option
 		/////////////////////////////// random pick from local word list
 		for( auto i = 0; i < iWordsToGuess; i++ )
 		{
@@ -191,8 +191,6 @@ void GameLogic::NewRound()
 		}
 	}
 
-
-  //m_WordsToGuess = GameWordList;
   InitGuessList();
   InitPartialWord();
   m_FailedGuesses = 0;
@@ -225,7 +223,7 @@ bool GameLogic::AddLetterToGuessList(char& letter)
   // if found?
   if( pos != m_GuessList.npos )
   {
-    m_GuessList[pos] = '_';//'þ';
+    m_GuessList[pos] = '_';
     return true;
   }
   

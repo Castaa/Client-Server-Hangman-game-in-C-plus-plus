@@ -5,6 +5,8 @@
 
 #include "NetCode/wcomm.h"
 
+using namespace std;
+
 enum  { CL_REQ_HI_SCORE           = 1, 
         CL_SEND_SCORE             = 2,
         CL_REQ_HI_SCORE_LIST      = 3,
@@ -18,11 +20,8 @@ enum  { CL_REQ_HI_SCORE           = 1,
 // upper 16 bits, major version, lower 16 bits minor version
 const int CLIENT_VER = 0x00010001; 
 
-using namespace std;
-
 string Network::m_MACAddr;
 bool   Network::m_bNetworkEnabled;
-
 
 
 int Network::QueryNetRank(bool& bTied, int OfThisScore /*=0*/)
@@ -70,7 +69,8 @@ int Network::QueryNetRank(bool& bTied, int OfThisScore /*=0*/)
 
     if( returnMessageSize >= sizeof(Rank) )
     {
-      bTied = buffer[sizeof(Rank)] > 0;
+      // Any additional non-zero value after the rank value return from the server means the score is tied in rank with another score
+      bTied = buffer[sizeof(Rank)] > 0; 
     }
 
     network.CloseServerConnection();
@@ -81,17 +81,18 @@ int Network::QueryNetRank(bool& bTied, int OfThisScore /*=0*/)
 
 void Network::QueryNetHiScores( vector<int>& netHiScores, int &rank )
 {
-	char buffer[1024] = "";
+  char buffer[1024] = "";
 
   WinNet network;
-	// Connect To Server
+  // Connect To game server
   if( network.ConnectToDefaultGameServer() )
   {
-
     string ReqStr = static_cast<char>(CL_REQ_HI_SCORE_LIST) + Network::GetMACAddress();
-	  network.SendDataToServer(ReqStr.c_str(), ReqStr.length());
-    int rsize = network.ReceiveDataFromServer(buffer, 1024);
-    if( rsize >= sizeof(int) * 2 ) // return message should contain 
+    
+	network.SendDataToServer(ReqStr.c_str(), ReqStr.length());
+    auto rsize = network.ReceiveDataFromServer(buffer, 1024);
+
+    if( rsize >= sizeof(int) * 2 ) // return message should contain rank value and score(s)
     {
       char *ptr = buffer;
       memcpy(&rank, ptr, sizeof(rank));
@@ -139,10 +140,9 @@ int Network::QueryNetPersonalBestScore()
   return Score;
 }
 
-void Network::SendNetHiScore(int localHiScores)
+void Network::SendNetHiScore(int localHiScore)
 {
   WinNet network;
-  //char buffer[1024];
   int Score = 0;
 
   if( network.ConnectToDefaultGameServer()  )
@@ -152,16 +152,13 @@ void Network::SendNetHiScore(int localHiScores)
     char* ptr = ReqStr;
     ReqStr[0]= static_cast<char>(CL_SEND_SCORE);
     ptr += sizeof(char);
-    memcpy( ptr, Network::GetMACAddress().c_str(), Network::GetMACAddress().length());
+    memcpy( ptr, Network::GetMACAddress().c_str(), Network::GetMACAddress().length() );
     ptr += Network::GetMACAddress().length();
-    memcpy( ptr, &localHiScores, sizeof(localHiScores) );
-    ptr += sizeof(localHiScores);
+    memcpy( ptr, &localHiScore, sizeof(localHiScore) );
+    ptr += sizeof(localHiScore);
 
-    network.SendDataToServer( ReqStr, ptr - ReqStr ); // request my best high score in the global high sore list, if any
-    //int bytesRecv = network.ReceiveDataFromServer( buffer, 1024 );   // get score
-
+    network.SendDataToServer( ReqStr, ptr - ReqStr ); // request my best high score in the global high score list, if any
     network.CloseServerConnection();
-
   }
 }
 
@@ -172,16 +169,9 @@ void Network::ShutdownNetServer()
 
   if( network.ConnectToDefaultGameServer()  )
   {                                                                  
-    char ReqStr[1024];
-    
-    char* ptr = ReqStr;
-    ReqStr[0]= static_cast<char>(CL_KILL_SERVER);
-    ptr += sizeof(char);
-    memcpy( ptr, Network::GetMACAddress().c_str(), Network::GetMACAddress().length());
-    ptr += Network::GetMACAddress().length();
+	string ReqStr = static_cast<char>(CL_KILL_SERVER) + Network::GetMACAddress();
 
-    network.SendDataToServer( ReqStr, ptr - ReqStr ); // request my best high score in the global high sore list, if any
-
+	network.SendDataToServer( ReqStr.c_str(), ReqStr.length() ); // request server shutdown
     network.CloseServerConnection();
   }
 }
@@ -229,18 +219,17 @@ void Network::SetMACAddress()
        stringstream temp;
        temp << hex << setfill('0') << setw(2)
 #ifdef _DEBUG
-          << (unsigned int)(rand() & 0xFF) << ":"
+          << static_cast<unsigned int>(rand() & 0xFF) << ":"
 #else
-          << (unsigned int)pAdapterInfo->Address[0] << ":"
+          << static_cast<unsigned int>pAdapterInfo->Address[0] << ":"
 #endif
-          << (unsigned int)pAdapterInfo->Address[1] << ":"
-          << (unsigned int)pAdapterInfo->Address[2] << ":"
-          << (unsigned int)pAdapterInfo->Address[3] << ":"
-          << (unsigned int)pAdapterInfo->Address[4] << ":"
-          << (unsigned int)pAdapterInfo->Address[5];
+          << static_cast<unsigned int>(pAdapterInfo->Address[1]) << ":"
+          << static_cast<unsigned int>(pAdapterInfo->Address[2]) << ":"
+          << static_cast<unsigned int>(pAdapterInfo->Address[3]) << ":"
+          << static_cast<unsigned int>(pAdapterInfo->Address[4]) << ":"
+          << static_cast<unsigned int>(pAdapterInfo->Address[5]);
 
        m_MACAddr = temp.str();
-
 
 #ifdef _DEBUG
       //cout << "Adapter Name :" << pAdapterInfo->AdapterName << " "
@@ -261,7 +250,7 @@ void Network::SetMACAddress()
     pAdapterInfo = pAdapterInfo->Next;
   }
 
-  if( m_MACAddr.empty() )
+  if( m_MACAddr.empty() ) // if no MAC address, then no internet access
   {
     SetNetworkStatus(false);
   }
