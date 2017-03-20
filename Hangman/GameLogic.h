@@ -11,7 +11,7 @@ class GameLogic
 private:
 	enum RoundMode { eSINGLE_WORD, eDOUBLE_WORD  };
 
-	std::vector<const std::string>			m_Dictionary;
+	std::vector<std::string>			m_Dictionary;
 	std::string								m_GuessList;
 	std::vector<std::string>				m_WordsToGuess;
 	std::vector<std::string>				m_PartialWord;

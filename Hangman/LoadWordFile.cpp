@@ -6,7 +6,7 @@ using namespace std;
 
 
 // loads contents from a zipped compressed dictionary file
-bool LoadWordFile(vector<const string>& wordVector)
+bool LoadWordFile(vector<string>& wordVector)
 {
   // 32K buffer
   #define MAX_LEN 0x8000

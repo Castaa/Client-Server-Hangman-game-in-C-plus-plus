@@ -45,7 +45,7 @@ typedef struct unz_global_info_s
 } unz_global_info;
 
 #ifndef _TM_DEFINED
-struct tm {
+struct tmi {
         int tm_sec;     /* seconds after the minute - [0,59] */
         int tm_min;     /* minutes after the hour - [0,59] */
         int tm_hour;    /* hours since midnight - [0,23] */
@@ -75,7 +75,7 @@ typedef struct unz_file_info_s
 	unsigned long disk_num_start;       // disk number start               2 bytes
 	unsigned long internal_fa;          // internal file attributes        2 bytes
 	unsigned long external_fa;          // external file attributes        4 bytes
-	tm tmu_date;
+	tmi tmu_date;
 } unz_file_info;
 
 
@@ -2291,7 +2291,7 @@ int unzGetGlobalInfo (unzFile file,unz_global_info *pglobal_info)
 }
 
 //   Translate date/time from Dos format to tm_unz (readable more easilty)
-void unzlocal_DosDateToTmuDate (uLong ulDosDate, tm* ptm)
+void unzlocal_DosDateToTmuDate (uLong ulDosDate, tmi* ptm)
 {
 	if(0) OutputDebugString("unzlocal_DosDateToTmuDate..\r\n");
 	uLong uDate;

@@ -48,7 +48,6 @@ bool WinNet::ConnectToDefaultGameServer()
 
   return ConnectServerByName(
     "localhost", // localhost is the hangman server running in cygwin, you can be changed to a URL like an ec2 instance
-
     m_cPortNum ); // port 20003
 
   //return ConnectServerByIP("192.168.0.1", m_cPortNum) // alternative, connect to server via its IP address
@@ -56,12 +55,37 @@ bool WinNet::ConnectToDefaultGameServer()
 }
 
 
-bool WinNet::ConnectServerByName(const string& name, int port)
+bool WinNet::ConnectServerByName(const char* name, int port)
 {
+/*
+char *hostname = "localhost";
+struct addrinfo hints, *res;
+struct in_addr addr;
+int err;
+
+WSAData data;
+WSAStartup(MAKEWORD(2,0), &data);
+
+memset(&hints, 0, sizeof(hints));
+hints.ai_socktype = SOCK_STREAM;
+hints.ai_family = AF_INET;
+
+if ((err = getaddrinfo(hostname, NULL, &hints, &res)) != 0) {
+printf("error %d\n", err);
+return 1;
+}
+
+addr.S_un = ((struct sockaddr_in *)(res->ai_addr))->sin_addr.S_un;
+
+printf("ip address : %s\n", inet_ntoa(addr));
+
+freeaddrinfo(res);
+WSACleanup();*/
+
 	// Store information about the server
 	LPHOSTENT hostEntry;
 
-	hostEntry = gethostbyname( name.c_str() );	// Specifying the server by its name;
+	hostEntry = gethostbyname( name );	// Specifying the server by its name;
 
 	if( !hostEntry ) 
 	{

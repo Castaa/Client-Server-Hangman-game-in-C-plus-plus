@@ -7,7 +7,7 @@ public:
 	WinNet();
 	~WinNet();
 
-	bool ConnectServerByName(char *name, int port);
+	bool ConnectServerByName(const char *name, int port);
 	bool ConnectToDefaultGameServer();
 	void CloseServerConnection();
 	int  SendDataToServer(const char* buffer, int size);

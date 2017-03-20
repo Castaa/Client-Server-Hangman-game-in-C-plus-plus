@@ -1,0 +1,14 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/Hangman/v14/.suo
+/Debug/Hangman.pdb
+/Debug/Hangman.ilk
+/Debug/Hangman.exe
+/Debug/Hangman.bsc
+/Hangman/Debug
+/ipch/HANGMAN-e29c6189
+/Hangman.VC.VC.opendb
+/Hangman.VC.db
+/.vs/Hangman/v15

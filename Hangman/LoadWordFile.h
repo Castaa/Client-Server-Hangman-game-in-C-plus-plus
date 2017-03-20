@@ -13,4 +13,4 @@ struct ltstr
 };
 #endif
 
-bool LoadWordFile(std::vector<const std::string>&);
+bool LoadWordFile(std::vector<std::string>&);
